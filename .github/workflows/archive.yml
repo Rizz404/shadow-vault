@@ -1,0 +1,44 @@
+name: Shadow-Vault Archive
+
+on:
+  schedule:
+    # Berjalan setiap hari pada jam 03:00 UTC
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  archive-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Apply Random Jitter
+        # Delay acak 1-180 menit (biar makin gak ketebak!)
+        run: |
+          DELAY=$(( (RANDOM % 180) + 1 ))
+          echo "Syncing knowledge in $DELAY minutes..."
+          sleep ${DELAY}m
+
+      - name: Run Indexer
+        run: npx tsx index.ts
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name "Rizz404"
+          git config --global user.email "109719910+Rizz404@users.noreply.github.com"
+
+          git add vault/
+          git diff --quiet && git diff --staged --quiet || (git commit -m "docs: archive new entry [$(date +'%Y-%m-%d')]" && git push)
