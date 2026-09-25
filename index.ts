@@ -9,10 +9,11 @@ const __dirname = path.dirname(__filename);
 async function indexKnowledge() {
   try {
     // Kita ambil kutipan inspiratif/teknis
-    const response = await axios.get(
-      "https://api.quotable.io/random?tags=technology,famous-quotes",
-    );
-    const { content, author } = response.data;
+    // (api.quotable.io sudah mati: sertifikat HTTPS-nya expired)
+    const response = await axios.get("https://dummyjson.com/quotes/random", {
+      timeout: 10000,
+    });
+    const { quote: content, author } = response.data;
 
     const vaultDir = path.join(__dirname, "vault");
     if (!fs.existsSync(vaultDir)) fs.mkdirSync(vaultDir);
@@ -28,6 +29,8 @@ async function indexKnowledge() {
     console.log(`✅ Shadow-Vault: New wisdom indexed for ${today}!`);
   } catch (error) {
     console.error("❌ Error capturing wisdom:", error);
+    // Biar step di workflow gagal dengan jelas, bukan diam-diam sukses
+    process.exit(1);
   }
 }
 
